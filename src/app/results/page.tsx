@@ -57,15 +57,23 @@ export default function ResultsPage() {
           Your Recommendations
         </h2>
         <p className="text-[14px] text-[#7a6f62] leading-[21px] mt-1">
-          {data.recommendations.length} programs found based on your situation
+          {data.recommendations.filter(r => r.verdict !== "not_yet").length} programs match your situation
+          {data.recommendations.some(r => r.verdict === "not_yet") && (
+            <span className="text-[#b02a2a]"> · {data.recommendations.filter(r => r.verdict === "not_yet").length} not eligible</span>
+          )}
         </p>
       </header>
 
-      {/* Content */}
+      {/* Content — sorted: eligible first, verify second, not_yet last */}
       <main className="flex-1 overflow-y-auto px-[18px] pt-[4px] pb-6">
-        {data.recommendations.map((program, i) => (
-          <ProgramCard key={i} program={program} />
-        ))}
+        {[...data.recommendations]
+          .sort((a, b) => {
+            const order: Record<string, number> = { eligible: 0, verify: 1, not_yet: 2 };
+            return (order[a.verdict] ?? 1) - (order[b.verdict] ?? 1);
+          })
+          .map((program, i) => (
+            <ProgramCard key={i} program={program} />
+          ))}
 
         {/* Conflicts */}
         {data.conflicts && (
