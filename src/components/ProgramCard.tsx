@@ -9,6 +9,49 @@ interface ProgramCardProps {
   onShowSteps?: () => void;
 }
 
+/** Small pill that shows whether data came from our verified DB or general LLM knowledge. */
+function SourceBadge({ sourceType }: { sourceType: ProgramRecommendation["source_type"] }) {
+  const isVerified = sourceType === "RAG_VERIFIED";
+  return (
+    <span
+      className="inline-flex items-center gap-[5px] px-[9px] py-[3px] rounded-full text-[11px] font-semibold tracking-[0.2px]"
+      style={{
+        backgroundColor: isVerified ? "#e6f4ec" : "#fff8ec",
+        color: isVerified ? "#1b7a43" : "#9a6207",
+        border: `1px solid ${isVerified ? "#b2dfc4" : "#f5dfa0"}`,
+      }}
+      title={
+        isVerified
+          ? "Verified in our system — this recommendation is grounded in official program documents stored in our database."
+          : "Not in our database — this is based on the AI's general knowledge. Always verify details with official government sources."
+      }
+    >
+      {isVerified ? (
+        <>
+          {/* shield-check icon */}
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 1L2 3.5V8c0 3.3 2.6 6.2 6 7 3.4-.8 6-3.7 6-7V3.5L8 1z" fill="#1b7a43" opacity="0.2"/>
+            <path d="M8 1L2 3.5V8c0 3.3 2.6 6.2 6 7 3.4-.8 6-3.7 6-7V3.5L8 1z" stroke="#1b7a43" strokeWidth="1.4" strokeLinejoin="round"/>
+            <path d="M5.5 8l1.8 1.8L10.5 6" stroke="#1b7a43" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Verified in our system
+        </>
+      ) : (
+        <>
+          {/* warning triangle icon */}
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2L1.5 13h13L8 2z" fill="#9a6207" opacity="0.15"/>
+            <path d="M8 2L1.5 13h13L8 2z" stroke="#9a6207" strokeWidth="1.4" strokeLinejoin="round"/>
+            <path d="M8 6v3.5" stroke="#9a6207" strokeWidth="1.4" strokeLinecap="round"/>
+            <circle cx="8" cy="11.5" r="0.75" fill="#9a6207"/>
+          </svg>
+          Not in our database
+        </>
+      )}
+    </span>
+  );
+}
+
 export default function ProgramCard({ program }: ProgramCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
@@ -19,16 +62,33 @@ export default function ProgramCard({ program }: ProgramCardProps) {
       style={{ borderRadius: "22px" }}
     >
       <div className="p-5">
-        <div className="flex items-start justify-between gap-3 mb-4">
+        {/* Header row: program name + verdict badge */}
+        <div className="flex items-start justify-between gap-3 mb-2">
           <h3 className="text-[19px] font-bold text-[#2b2620] leading-snug flex-1">
             {program.programName}
           </h3>
           <VerdictBadge verdict={program.verdict} />
         </div>
 
-        <p className="text-[14px] text-[#6b6155] leading-[21px] mb-4">
+        {/* Source badge — shown only when source_type is present */}
+        {program.source_type && (
+          <div className="mb-3">
+            <SourceBadge sourceType={program.source_type} />
+          </div>
+        )}
+
+        {/* Why relevant */}
+        <p className="text-[14px] text-[#6b6155] leading-[21px] mb-1">
           {program.whyRelevant}
         </p>
+
+        {/* Reasoning / citation — shown when present */}
+        {program.reasoning && (
+          <p className="text-[12px] text-[#a89c8c] leading-[18px] italic mb-4">
+            {program.reasoning}
+          </p>
+        )}
+        {!program.reasoning && <div className="mb-4" />}
 
         <div className="border-t border-[#f2ebe0] pt-[14px]">
           <button
@@ -114,3 +174,4 @@ export default function ProgramCard({ program }: ProgramCardProps) {
     </div>
   );
 }
+
