@@ -162,6 +162,11 @@ export default function ChatPage() {
 
       {/* Input area */}
       <div className="bg-[#ede5d8] border-t border-[#ddd0be] px-[18px] pt-[14px] pb-7 sticky bottom-0">
+        {!showChips && messages.length <= 1 && (
+          <p className="text-[13px] text-[#a89c8c] mb-3 leading-[18px]">
+            Example: I'm in Indonesia, just lost my job and have 2 kids in school
+          </p>  
+        )}
         <div className="flex gap-[10px] items-end">
           <div
             className="flex-1 bg-white border border-[#eadfcf] px-4 py-[14px] min-h-[48px] max-h-32 flex items-center"
@@ -195,11 +200,6 @@ export default function ChatPage() {
             ↑
           </button>
         </div>
-        {!showChips && messages.length <= 1 && (
-          <p className="text-[13px] text-[#a89c8c] mt-3 leading-[18px]">
-            Example: I'm in Indonesia, just lost my job, and have 2 kids in school
-          </p>
-        )}
       </div>
     </div>
   );

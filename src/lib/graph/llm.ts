@@ -65,7 +65,9 @@ function isRetryableError(err: unknown): boolean {
 
   // HTTP status codes
   const status = (e.status ?? e.statusCode) as number | undefined;
-  if (status === 429 || status === 402 || status === 403) return true;
+  // 404 = model not found on this provider (retryable — try next model/tier)
+  // 429 = rate limit, 402 = payment/quota, 403 = access denied
+  if (status === 404 || status === 429 || status === 402 || status === 403) return true;
 
   // Node.js network errors
   const code = String(e.code ?? "");
@@ -79,6 +81,9 @@ function isRetryableError(err: unknown): boolean {
     msg.includes("quota") ||
     msg.includes("timeout") ||
     msg.includes("overloaded") ||
+    msg.includes("not found") ||       // model removed / wrong ID
+    msg.includes("no endpoints found") ||  // OpenRouter: no provider for model
+    msg.includes("decommissioned") ||  // Groq: model retired
     msg.includes("429") ||
     msg.includes("403")
   );
@@ -88,16 +93,8 @@ function isRetryableError(err: unknown): boolean {
 // Tier 1 — OpenRouter (multi-model waterfall within the tier)
 // ---------------------------------------------------------------------------
 
-/** Free-tier OpenRouter models, ordered by capability. */
-const OPENROUTER_MODELS = [
-  "google/gemini-flash-1.5",          // Primary: Gemini 1.5 Flash via OpenRouter
-  "openai/gpt-oss-120b",              // Fallback 1
-  "google/gemma-4-31b-it",            // Fallback 2
-  "meta-llama/llama-3.3-70b-instruct",// Fallback 3
-  "nvidia/nemotron-3-ultra-550b-a55b",// Fallback 4
-  "openai/gpt-oss-20b",               // Fallback 5
-  "google/gemma-4-26b-a4b-it",        // Fallback 6
-] as const;
+/** Primary model for Tier 1 — single attempt, fail fast. */
+const OPENROUTER_PRIMARY = "google/gemini-flash-1.5:free";
 
 function buildOpenRouterClient(model: string): ChatOpenAI {
   return new ChatOpenAI({
@@ -112,121 +109,83 @@ function buildOpenRouterClient(model: string): ChatOpenAI {
     },
     temperature: 0.7,
     maxTokens: 2048,
-    timeout: 30_000,
+    timeout: 8_000,   // fail fast — if tier 1 is unreachable, escalate immediately
   });
 }
 
 /**
- * Attempts every OpenRouter model in sequence.
- * Returns the AIMessage on first success.
- * Throws if all models are rate-limited / fail.
+ * Tier 1 — single attempt on the primary OpenRouter model.
+ * Any failure (rate-limit, 404, timeout, etc.) escalates to Tier 2.
  */
 async function tryTier1(messages: BaseMessage[]): Promise<AIMessage> {
   const key = process.env.OPENROUTER_API_KEY;
   if (!key) throw new Error("[Tier 1] OPENROUTER_API_KEY is not set — skipping.");
 
-  let lastErr: unknown;
-  for (const model of OPENROUTER_MODELS) {
-    const client = buildOpenRouterClient(model);
-    try {
-      const result = await client.invoke(messages);
-      console.log(`[llm] ✓ Tier 1 served by OpenRouter/${model}`);
-      return result;
-    } catch (err) {
-      if (isRetryableError(err)) {
-        console.warn(`[llm] ⚠ Tier 1 OpenRouter/${model} failed — trying next.`);
-        lastErr = err;
-        continue;
-      }
-      throw err; // non-retryable — bubble up immediately
-    }
-  }
-  throw Object.assign(
-    new Error("[Tier 1] All OpenRouter models exhausted."),
-    { status: 429, cause: lastErr }
-  );
+  const client = buildOpenRouterClient(OPENROUTER_PRIMARY);
+  const result = await client.invoke(messages);
+  console.log(`[llm] ✓ Tier 1 served by OpenRouter/${OPENROUTER_PRIMARY}`);
+  return result;
 }
 
 // ---------------------------------------------------------------------------
 // Tier 2 — Google AI Studio (direct, not via OpenRouter)
 // ---------------------------------------------------------------------------
 
-const GOOGLE_MODELS = [
-  "gemini-1.5-flash",   // Primary
-  "gemini-1.5-flash-8b",// Smaller/faster fallback
-] as const;
+/** Primary model for Tier 2. */
+const GOOGLE_PRIMARY = "gemini-2.0-flash";
 
+/**
+ * Tier 2 — single attempt on Google AI Studio.
+ * Any failure escalates to Tier 3.
+ */
 async function tryTier2(messages: BaseMessage[]): Promise<AIMessage> {
   const key = process.env.GOOGLE_AI_STUDIO_API_KEY;
   if (!key) throw new Error("[Tier 2] GOOGLE_AI_STUDIO_API_KEY is not set — skipping.");
 
-  let lastErr: unknown;
-  for (const model of GOOGLE_MODELS) {
-    const client = new ChatGoogleGenerativeAI({
-      model,
-      apiKey: key,
-      temperature: 0.7,
-      maxOutputTokens: 2048,
-    });
-    try {
-      const result = await client.invoke(messages);
-      console.log(`[llm] ✓ Tier 2 served by Google AI Studio / ${model}`);
-      return result as AIMessage;
-    } catch (err) {
-      if (isRetryableError(err)) {
-        console.warn(`[llm] ⚠ Tier 2 Google/${model} failed — trying next.`);
-        lastErr = err;
-        continue;
-      }
-      throw err;
-    }
+  const client = new ChatGoogleGenerativeAI({
+    model: GOOGLE_PRIMARY,
+    apiKey: key,
+    temperature: 0.7,
+    maxOutputTokens: 2048,
+  });
+
+  // AbortSignal.timeout ensures we don't hang indefinitely if Google is slow
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20_000); // 20s hard limit
+  try {
+    const result = await client.invoke(messages, { signal: controller.signal });
+    console.log(`[llm] ✓ Tier 2 served by Google AI Studio / ${GOOGLE_PRIMARY}`);
+    return result as AIMessage;
+  } finally {
+    clearTimeout(timer);
   }
-  throw Object.assign(
-    new Error("[Tier 2] Google AI Studio exhausted."),
-    { status: 429, cause: lastErr }
-  );
 }
 
 // ---------------------------------------------------------------------------
 // Tier 3 — Groq (final safety net)
 // ---------------------------------------------------------------------------
 
-const GROQ_MODELS = [
-  "llama-3.3-70b-versatile",  // Primary: Llama 3.3 70B
-  "mixtral-8x7b-32768",       // Fallback: Mixtral 8×7B (long context)
-  "llama3-8b-8192",           // Last resort: Llama 3 8B (fastest)
-] as const;
+/** Primary model for Tier 3. */
+const GROQ_PRIMARY = "llama-3.3-70b-versatile";
 
+/**
+ * Tier 3 — single attempt on Groq.
+ * Final safety net — any failure → critical error.
+ */
 async function tryTier3(messages: BaseMessage[]): Promise<AIMessage> {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw new Error("[Tier 3] GROQ_API_KEY is not set — skipping.");
 
-  let lastErr: unknown;
-  for (const model of GROQ_MODELS) {
-    const client = new ChatGroq({
-      model,
-      apiKey: key,
-      temperature: 0.7,
-      maxTokens: 2048,
-      maxRetries: 0, // We handle retries ourselves
-    });
-    try {
-      const result = await client.invoke(messages);
-      console.log(`[llm] ✓ Tier 3 served by Groq / ${model}`);
-      return result as AIMessage;
-    } catch (err) {
-      if (isRetryableError(err)) {
-        console.warn(`[llm] ⚠ Tier 3 Groq/${model} failed — trying next.`);
-        lastErr = err;
-        continue;
-      }
-      throw err;
-    }
-  }
-  throw Object.assign(
-    new Error("[Tier 3] All Groq models exhausted."),
-    { status: 429, cause: lastErr }
-  );
+  const client = new ChatGroq({
+    model: GROQ_PRIMARY,
+    apiKey: key,
+    temperature: 0.7,
+    maxTokens: 2048,
+    maxRetries: 0,
+  });
+  const result = await client.invoke(messages);
+  console.log(`[llm] ✓ Tier 3 served by Groq / ${GROQ_PRIMARY}`);
+  return result as AIMessage;
 }
 
 // ---------------------------------------------------------------------------
@@ -329,4 +288,5 @@ export const llm = createFallbackLLM();
 // Re-export types for consumers
 // ---------------------------------------------------------------------------
 export type { BaseChatModel };
-export { OPENROUTER_MODELS, GROQ_MODELS, GOOGLE_MODELS };
+export { OPENROUTER_PRIMARY, GOOGLE_PRIMARY, GROQ_PRIMARY };
+

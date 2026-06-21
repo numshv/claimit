@@ -412,8 +412,8 @@ Output format (exact):
       "documents": ["string"]
     }
   ],
-  "conflicts": "string or null — programs that cannot be received simultaneously",
-  "synergies": "string or null — programs that work well together",
+  "conflicts": "string or null — programs in the list that cannot be received simultaneously (be specific about which pair conflicts)",
+  "synergies": "string — REQUIRED, never null. Write a practical 'Good to Know' tip: e.g. which gateway program (like DTKS registration) unlocks multiple benefits, how two eligible programs can be stacked, or a shortcut in the application process. If no synergies exist, give a general tip relevant to the user's country/situation (e.g. 'Tip: Being registered in DTKS is the key gateway that unlocks PKH, BPNT, PIP, and BPJS PBI simultaneously.').",
   "priorityAction": "string — the single most actionable next step, even if ineligible for most programs"
 }`;
 
