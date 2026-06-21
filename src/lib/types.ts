@@ -1,10 +1,16 @@
 export type VerdictType = "eligible" | "verify" | "not_yet";
 
+export type SourceType = "RAG_VERIFIED" | "GENERAL_KNOWLEDGE";
+
 export interface ProgramRecommendation {
   programName: string;
   whyRelevant: string;
   verdict: VerdictType;
   verdictLabel: string;
+  /** Whether this recommendation came from our verified document DB or LLM general knowledge. */
+  source_type?: SourceType;
+  /** Brief explanation of why this program was chosen and where the data came from. */
+  reasoning?: string;
   pros: string[];
   cons: string[];
   steps: string[];
