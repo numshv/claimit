@@ -17,7 +17,7 @@ export default function ChipOptions({ options, onSelect }: ChipOptionsProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-[10px] mt-1 mb-3">
+    <div className="flex flex-col gap-[8px] mt-1 mb-3 w-full max-w-[280px]">
       {options.map((option) => (
         <button
           key={option}

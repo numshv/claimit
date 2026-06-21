@@ -125,7 +125,7 @@ export default function ChatPage() {
       {isLoading && <LoadingScreen />}
 
       {/* Header */}
-      <header className="bg-[#fbf6ef] border-b border-[#efe6d8] px-5 pt-[6px] pb-4 flex items-center gap-3 sticky top-0 z-10">
+      <header className="bg-[#ede5d8] border-b border-[#ddd0be] px-5 pt-[6px] pb-4 flex items-center gap-3 sticky top-0 z-10">
         <button
           onClick={() => router.push("/")}
           className="w-[30px] h-[30px] flex items-center justify-center text-[#11808a] text-[18px] font-semibold rounded-full"
@@ -134,7 +134,7 @@ export default function ChatPage() {
         </button>
         <div>
           <p className="text-[16px] font-semibold text-[#2b2620] leading-none">ClaimIt</p>
-          <p className="text-[12px] text-[#11808a] mt-0.5">● Online · ready to help</p>
+          <p className="text-[12px] text-[#11808a] mt-0.5">● Online</p>
         </div>
       </header>
 
@@ -161,7 +161,12 @@ export default function ChatPage() {
       </main>
 
       {/* Input area */}
-      <div className="bg-[#fbf6ef] border-t border-[#efe6d8] px-[18px] pt-[14px] pb-7 sticky bottom-0">
+      <div className="bg-[#ede5d8] border-t border-[#ddd0be] px-[18px] pt-[14px] pb-7 sticky bottom-0">
+        {!showChips && messages.length <= 1 && (
+          <p className="text-[13px] text-[#a89c8c] mb-3 leading-[18px]">
+            Example: I just lost my job and have 2 kids in school
+          </p>
+        )}
         <div className="flex gap-[10px] items-end">
           <div
             className="flex-1 bg-white border border-[#eadfcf] px-4 py-[14px] min-h-[48px] max-h-32 flex items-center"
@@ -195,11 +200,6 @@ export default function ChatPage() {
             ↑
           </button>
         </div>
-        {!showChips && messages.length <= 1 && (
-          <p className="text-[13px] text-[#a89c8c] mt-3 leading-[18px]">
-            Example: I just lost my job and have 2 kids in school
-          </p>
-        )}
       </div>
     </div>
   );
