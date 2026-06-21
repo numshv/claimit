@@ -1,26 +1,102 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Warm off-white background, like the reference screens */
+  --color-background: #fafaf8;
+  --color-surface: #ffffff;
+
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #6b6b68;
+  --color-ink-faint: #9c9c98;
+
+  --color-border: #ececE8;
+  --color-border-strong: #dedeDA;
+
+  /* The orb / accent gradient — warm orange, the "AI" color */
+  --color-ember-50: #fff4ec;
+  --color-ember-100: #ffe5d3;
+  --color-ember-200: #ffc8a0;
+  --color-ember-300: #ffa666;
+  --color-ember-400: #ff8a3d;
+  --color-ember-500: #ff6b1a;
+  --color-ember-600: #f2540a;
+  --color-ember-700: #c84207;
+  --color-ember-800: #9c350c;
+  --color-ember-900: #7a2b0e;
+
+  /* Category accent colors for program badges */
+  --color-category-food: #2e9e5b;
+  --color-category-healthcare: #2e7fe0;
+  --color-category-housing: #8b5cf6;
+  --color-category-childcare: #ec6bab;
+  --color-category-utilities: #e0a52e;
+  --color-category-income: #19a3a3;
+  --color-category-education: #5b6fe0;
+
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+  --radius-pill: 999px;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  --shadow-soft: 0 2px 10px rgba(20, 20, 20, 0.04);
+  --shadow-card: 0 4px 20px rgba(20, 20, 20, 0.06);
+  --shadow-floating: 0 8px 30px rgba(20, 20, 20, 0.1);
+
+  --animate-orb-pulse: orb-pulse 3.5s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.25s ease-out;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
 }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Radial gradient can't be expressed as a single @theme color token,
+   so the orb fill stays a real utility class. */
+@utility bg-ember-orb {
+  background-image: radial-gradient(
+    circle at 32% 28%,
+    #ffc78a 0%,
+    #ff8a3d 38%,
+    #f2540a 72%,
+    #c84207 100%
+  );
+}
+
+html, body { height: 100%; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+::-webkit-scrollbar { display: none; }
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* Soft glowing halo behind the orb, matching the reference screenshots */
+@utility orb-glow {
+  box-shadow:
+    0 0 0 1px rgba(255, 138, 61, 0.08),
+    0 10px 40px -10px rgba(255, 107, 26, 0.45),
+    0 0 60px -15px rgba(255, 107, 26, 0.35);
+}
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }

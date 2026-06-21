@@ -1,0 +1,111 @@
+// ClaimIt — Prisma schema
+// Database: Supabase Postgres
+// Run `npm run prisma:push` after setting DATABASE_URL in .env.local
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String?  @unique
+  name        String?
+  state       String? // "CA" | "TX" | "NY"
+  city        String?
+  createdAt   DateTime @default(now())
+
+  profile     UserProfile?
+  bookmarks   Bookmark[]
+  documents   UserDocument[]
+  chatHistory ChatMessage[]
+  progress    ProgramProgress[]
+}
+
+model UserProfile {
+  id                String  @id @default(uuid())
+  userId            String  @unique
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  householdSize     Int?
+  monthlyIncome     Int? // in USD
+  employmentStatus  String? // "employed" | "unemployed" | "self-employed" | "retired"
+  hasChildren       Boolean?
+  childrenAges      Json? // array of ages
+  hasDisability     Boolean?
+  citizenshipStatus String? // "citizen" | "permanent_resident" | "other"
+  urgencyCategory   String? // "food" | "healthcare" | "housing" | "childcare" | "utilities" | "income"
+}
+
+model Program {
+  id                 String   @id @default(uuid())
+  slug               String   @unique // e.g. "snap", "medicaid"
+  name               String // e.g. "SNAP"
+  fullName           String // e.g. "Supplemental Nutrition Assistance Program"
+  category           String // "food" | "healthcare" | "housing" | "childcare" | "utilities" | "income" | "education"
+  organizer          String // e.g. "USDA / State Agency"
+  description        String
+  benefits           String // what the user gets
+  eligibilitySummary String // plain language eligibility summary
+  requirements       Json // array of requirement strings
+  steps              Json // array of apply steps
+  timeline           Json // { processing: "30 days", renewal: "annually" }
+  statesAvailable    Json // ["CA", "TX", "NY"] or ["ALL"]
+  applyUrl           String // official application link
+  sourceUrl          String // official info page link
+  hotline            String?
+  isActive           Boolean  @default(true)
+
+  bookmarks Bookmark[]
+  progress  ProgramProgress[]
+}
+
+model Bookmark {
+  id               String   @id @default(uuid())
+  userId           String
+  programId        String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program          Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  savedAt          DateTime @default(now())
+  eligibilityScore Int? // 0-100, AI scoring at time of save
+
+  @@unique([userId, programId])
+}
+
+model ProgramProgress {
+  id          String   @id @default(uuid())
+  userId      String
+  programId   String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  currentStep String   @default("gather_docs")
+  // Steps: "gather_docs" | "submit_application" | "interview" | "waiting" | "approved" | "receiving"
+  notes       String?
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, programId])
+}
+
+model UserDocument {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String // "id_proof" | "proof_of_income" | "proof_of_address" | "ssn" | "birth_certificate" | "other"
+  label      String // display name, e.g. "Driver's License"
+  fileUrl    String? // Supabase Storage URL
+  status     String    @default("missing") // "missing" | "ready" | "needs_update"
+  expiresAt  DateTime?
+  uploadedAt DateTime?
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String // "user" | "assistant"
+  content   String
+  metadata  Json? // { programs_recommended: [...], sources: [...] }
+  createdAt DateTime @default(now())
+}
