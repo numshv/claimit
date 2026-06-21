@@ -200,6 +200,11 @@ export default function ChatPage() {
             ↑
           </button>
         </div>
+        {!showChips && messages.length <= 1 && (
+          <p className="text-[13px] text-[#a89c8c] mt-3 leading-[18px]">
+            Example: I'm in Indonesia, just lost my job, and have 2 kids in school
+          </p>
+        )}
       </div>
     </div>
   );
