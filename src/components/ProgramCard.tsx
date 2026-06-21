@@ -35,9 +35,9 @@ export default function ProgramCard({ program }: ProgramCardProps) {
             onClick={() => setExpanded(!expanded)}
             className="flex items-center justify-between w-full text-[#11808a]"
           >
-            <span className="text-[13px] font-semibold">Plus &amp; minus</span>
+            <span className="text-[13px] font-semibold">Pros &amp; cons</span>
             <span className="text-[11px] font-semibold">
-              {expanded ? "▲ sembunyikan" : "▼ lihat"}
+              {expanded ? "▲ hide" : "▼ show"}
             </span>
           </button>
 
@@ -45,7 +45,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
             <div className="mt-[14px] space-y-4">
               <div>
                 <p className="text-[11px] font-bold text-[#1b7a43] tracking-[0.55px] uppercase mb-2">
-                  Kelebihan
+                  Benefits
                 </p>
                 <div className="space-y-[5px]">
                   {program.pros.map((pro, i) => (
@@ -57,7 +57,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
               </div>
               <div>
                 <p className="text-[11px] font-bold text-[#9a6207] tracking-[0.55px] uppercase mb-2">
-                  Perlu Disiapkan
+                  Watch Out For
                 </p>
                 <div className="space-y-[5px]">
                   {program.cons.map((con, i) => (
@@ -77,12 +77,12 @@ export default function ProgramCard({ program }: ProgramCardProps) {
           onClick={() => setShowSteps(true)}
           className="mx-5 mb-5 w-[calc(100%-40px)] bg-[#11808a] text-white text-[15px] font-semibold py-[14px] rounded-[16px] text-center"
         >
-          Lihat Langkah Daftar
+          See How to Apply
         </button>
       ) : (
         <div className="mx-5 mb-5 border-t border-[#f2ebe0] pt-4">
           <p className="text-[11px] font-bold text-[#7a6f62] tracking-[0.55px] uppercase mb-3">
-            Langkah Daftar
+            Steps to Apply
           </p>
           <ol className="space-y-2 mb-4">
             {program.steps.map((step, i) => (
@@ -97,7 +97,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
           {program.documents.length > 0 && (
             <>
               <p className="text-[11px] font-bold text-[#7a6f62] tracking-[0.55px] uppercase mb-2">
-                Dokumen Dibutuhkan
+                Documents Needed
               </p>
               <ul className="space-y-1">
                 {program.documents.map((doc, i) => (

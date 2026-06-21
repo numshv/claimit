@@ -24,15 +24,15 @@ export default function ResultsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#fbf6ef] flex flex-col items-center justify-center px-6 max-w-md mx-auto">
+      <div className="min-h-screen bg-[#fbf6ef] flex flex-col items-center justify-center px-6">
         <p className="text-[#6b6155] text-center mb-6 text-[15px] leading-[23px]">
-          Data rekomendasi tidak ditemukan. Mulai percakapan baru ya.
+          No recommendations found. Start a new conversation.
         </p>
         <button
           onClick={() => { sessionStorage.clear(); router.push("/chat"); }}
           className="bg-[#11808a] text-white rounded-[18px] px-8 py-[14px] font-semibold text-[16px]"
         >
-          Mulai Ulang
+          Start Over
         </button>
       </div>
     );
@@ -50,14 +50,14 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fbf6ef] max-w-md mx-auto flex flex-col">
+    <div className="min-h-screen bg-[#fbf6ef] flex flex-col">
       {/* Header */}
       <header className="bg-[#fbf6ef] px-[22px] pt-3 pb-2 sticky top-0 z-10">
         <h2 className="text-[25px] font-bold text-[#2b2620] tracking-[-0.25px]">
-          Rekomendasi untuk kamu
+          Your Recommendations
         </h2>
         <p className="text-[14px] text-[#7a6f62] leading-[21px] mt-1">
-          {data.recommendations.length} program ditemukan berdasarkan situasimu
+          {data.recommendations.length} programs found based on your situation
         </p>
       </header>
 
@@ -71,7 +71,7 @@ export default function ResultsPage() {
         {data.conflicts && (
           <div className="bg-[#fff8ec] border border-[#f5dfa0] rounded-[18px] p-4 mb-[14px]">
             <p className="text-[13px] font-bold text-[#9a6207] uppercase tracking-[0.52px] mb-1">
-              Tidak bisa digabung
+              Cannot Be Combined
             </p>
             <p className="text-[13px] text-[#5a4a30] leading-[19.5px]">{data.conflicts}</p>
           </div>
@@ -80,7 +80,7 @@ export default function ResultsPage() {
         {/* Synergies */}
         {data.synergies && (
           <div className="bg-[#e8f3f4] rounded-[18px] p-4 mb-[14px]">
-            <p className="text-[13px] font-bold text-[#0a5c64] mb-1">Yang perlu kamu tahu</p>
+            <p className="text-[13px] font-bold text-[#0a5c64] mb-1">Good to Know</p>
             <p className="text-[13px] text-[#46595b] leading-[19.5px]">{data.synergies}</p>
           </div>
         )}
@@ -92,13 +92,13 @@ export default function ResultsPage() {
           onClick={() => router.push("/summary")}
           className="w-full bg-[#11808a] text-white text-[16px] font-semibold rounded-[18px] py-[16px] text-center"
         >
-          Simpan Ringkasan
+          Save Summary
         </button>
         <button
           onClick={() => { sessionStorage.clear(); router.push("/chat"); }}
           className="w-full text-[#a89c8c] text-[14px] py-3 mt-1"
         >
-          Mulai Ulang
+          Start Over
         </button>
       </div>
     </div>

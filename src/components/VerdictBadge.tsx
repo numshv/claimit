@@ -6,17 +6,17 @@ interface VerdictBadgeProps {
 
 const VERDICT_CONFIG: Record<VerdictType, { label: string; bg: string; text: string }> = {
   eligible: {
-    label: "Kemungkinan Besar Eligible",
+    label: "Likely Eligible",
     bg: "#e3f3e8",
     text: "#1b7a43",
   },
   verify: {
-    label: "Perlu Verifikasi",
+    label: "Needs Verification",
     bg: "#fbead0",
     text: "#9a6207",
   },
   not_yet: {
-    label: "Belum Optimal Sekarang",
+    label: "Not Ready Yet",
     bg: "#fde8e8",
     text: "#b02a2a",
   },

@@ -8,16 +8,17 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { ChatMessage, RecommendationResponse } from "@/lib/types";
 
 const OPENING_MESSAGE =
-  "Halo! Ceritakan kondisi kamu sekarang — apa yang sedang kamu hadapi? Tidak perlu formal, cerita aja seperti ke teman.";
+  "Hi! Tell me what's going on — what are you dealing with right now, or what kind of support are you looking for? No need to be formal, just talk to me like a friend.";
 
 const INCOME_CHIPS = [
-  "Di bawah Rp 1 juta",
-  "Rp 1–2 juta",
-  "Rp 2–4 juta",
-  "Rp 4 juta ke atas",
+  "Very low / no income",
+  "Low income",
+  "Moderate income",
+  "Middle income",
+  "Above average",
 ];
 
-const INCOME_TRIGGERS = ["penghasilan", "pendapatan", "gaji", "income", "berapa"];
+const INCOME_TRIGGERS = ["income", "salary", "earn", "household income", "monthly income", "how much"];
 
 function shouldShowIncomeChips(text: string): boolean {
   const lower = text.toLowerCase();
@@ -85,7 +86,7 @@ export default function ChatPage() {
         setShowChips(false);
       }
     } catch {
-      setError("Maaf, ada gangguan koneksi. Silakan coba lagi.");
+      setError("Connection error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +121,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fbf6ef] flex flex-col max-w-md mx-auto">
+    <div className="min-h-screen bg-[#fbf6ef] flex flex-col">
       {isLoading && <LoadingScreen />}
 
       {/* Header */}
@@ -133,7 +134,7 @@ export default function ChatPage() {
         </button>
         <div>
           <p className="text-[16px] font-semibold text-[#2b2620] leading-none">ClaimIt</p>
-          <p className="text-[12px] text-[#11808a] mt-0.5">● Online · siap mendengarkan</p>
+          <p className="text-[12px] text-[#11808a] mt-0.5">● Online · ready to help</p>
         </div>
       </header>
 
@@ -151,7 +152,7 @@ export default function ChatPage() {
           <div className="bg-[#fde8e8] border border-[#f5c6c6] rounded-[16px] px-4 py-3 text-[13px] text-[#b02a2a] mb-3 flex items-center justify-between">
             <span>{error}</span>
             <button onClick={handleRetry} className="ml-3 underline font-semibold whitespace-nowrap">
-              Coba lagi
+              Try again
             </button>
           </div>
         )}
@@ -179,7 +180,7 @@ export default function ChatPage() {
                   handleSend();
                 }
               }}
-              placeholder={showChips ? "atau ketik jawabanmu…" : "Tulis ceritamu di sini…"}
+              placeholder={showChips ? "or type your answer…" : "Share what's going on…"}
               disabled={isLoading}
               rows={1}
               className="w-full resize-none bg-transparent text-[15px] text-[#2b2620] placeholder-[#b3a795] focus:outline-none disabled:text-[#b3a795] leading-[22px]"
@@ -196,7 +197,7 @@ export default function ChatPage() {
         </div>
         {!showChips && messages.length <= 1 && (
           <p className="text-[13px] text-[#a89c8c] mt-3 leading-[18px]">
-            Contoh: saya baru kena PHK dan punya 2 anak yang masih sekolah
+            Example: I just lost my job and have 2 kids in school
           </p>
         )}
       </div>

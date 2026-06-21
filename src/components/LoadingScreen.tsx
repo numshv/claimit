@@ -6,10 +6,10 @@ export default function LoadingScreen() {
         <div className="w-[30px] h-[30px] border-[3px] border-[#11808a] rounded-full animate-spin border-t-transparent" />
       </div>
       <p className="text-[21px] font-semibold text-[#2b2620] text-center leading-[29.4px] max-w-[180px] mb-[14px]">
-        ClaimIt AI sedang menganalisis situasi kamu…
+        ClaimIt AI is analyzing your situation…
       </p>
       <p className="text-[15px] text-[#7a6f62] text-center leading-[23.25px] max-w-[218px]">
-        Kami mencocokkan kondisimu dengan program bantuan yang tersedia
+        Matching your situation with available assistance programs
       </p>
     </div>
   );

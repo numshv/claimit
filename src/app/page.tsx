@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#fbf6ef] flex flex-col items-center justify-between px-7 pt-0 pb-10 max-w-md mx-auto">
+    <div className="min-h-screen bg-[#fbf6ef] flex flex-col items-center justify-between px-7 pt-0 pb-10">
       <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
         <div className="bg-[#11808a] w-[60px] h-[60px] rounded-[22px] flex items-center justify-center mb-2">
           <div className="w-[31px] h-[31px] flex items-center justify-center rotate-45">
@@ -13,7 +13,7 @@ export default function Home() {
           ClaimIt
         </h1>
         <p className="text-[18px] text-[#7a6f62] leading-[27px] max-w-[235px]">
-          Ceritakan kondisimu, kami carikan bantuan yang tepat
+          Tell us your situation, we'll find the right support
         </p>
       </div>
 
@@ -22,10 +22,10 @@ export default function Home() {
           href="/chat"
           className="w-full bg-[#11808a] text-white text-[17px] font-semibold rounded-[18px] py-[17px] text-center block hover:bg-[#0e6e76] active:bg-[#0c5f66] transition-colors"
         >
-          Mulai Sekarang
+          Get Started
         </Link>
         <p className="text-[13px] text-[#a89c8c]">
-          Gratis · Tidak ada data yang disimpan
+          Free · No data stored
         </p>
       </div>
     </div>
