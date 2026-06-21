@@ -1,55 +1,35 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Refreshes the Supabase auth session on every request and protects
-// app routes that require a logged-in user.
+// Refreshes the Supabase auth token on every request.
+// ClaimIt is a public app — no route-level auth protection needed.
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: { headers: request.headers },
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({ name, value, ...options })
-          response = NextResponse.next({ request: { headers: request.headers } })
-          response.cookies.set({ name, value, ...options })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({ name, value: '', ...options })
-          response = NextResponse.next({ request: { headers: request.headers } })
-          response.cookies.set({ name, value: '', ...options })
-        },
+  // Skip if Supabase is not configured (e.g. dev without env vars)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !supabaseKey) {
+    return response
+  }
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll()
       },
-    }
-  )
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options)
+        })
+      },
+    },
+  })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const path = request.nextUrl.pathname
-  const isAuthRoute = path.startsWith('/login')
-  const isPublicAsset =
-    path.startsWith('/_next') || path.startsWith('/api') || path.includes('.')
-
-  // Not logged in and trying to hit a protected route → send to /login
-  if (!user && !isAuthRoute && !isPublicAsset) {
-    const redirectUrl = new URL('/login', request.url)
-    redirectUrl.searchParams.set('redirectTo', path)
-    return NextResponse.redirect(redirectUrl)
-  }
-
-  // Logged in but sitting on /login → send home
-  if (user && isAuthRoute) {
-    return NextResponse.redirect(new URL('/', request.url))
-  }
+  // Refresh the session token if it exists — no redirect on failure.
+  await supabase.auth.getUser()
 
   return response
 }
