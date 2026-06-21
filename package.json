@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.83",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-dialog": "^1.1.17",
@@ -23,6 +24,7 @@
     "ai": "^6.0.208",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
     "pg": "^8.22.0",

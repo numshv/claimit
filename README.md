@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ClaimIt
 
-## Getting Started
+AI-powered chatbot yang membantu orang Indonesia menemukan program bantuan pemerintah yang sesuai dengan kondisi hidup mereka — tanpa perlu tahu nama programnya dulu.
 
-First, run the development server:
+## Cara Pakai
+
+1. Buka aplikasi dan klik **Mulai Sekarang**
+2. Ceritakan kondisimu secara bebas — tidak perlu formal
+3. Jawab pertanyaan lanjutan dari AI (bisa pilih chip atau ketik sendiri)
+4. Lihat rekomendasi program bantuan beserta langkah daftarnya
+5. Simpan atau bagikan ringkasannya
+
+## Setup Development
+
+### Prerequisites
+
+- Node.js 18+
+- Gemini API key — dapatkan gratis di [Google AI Studio](https://aistudio.google.com/app/apikey)
+
+### Instalasi
+
+```bash
+git clone <repo-url>
+cd claimit
+npm install
+```
+
+### Konfigurasi
+
+Buat file `.env.local` di root project:
+
+```
+GEMINI_API_KEY=your_api_key_here
+```
+
+### Jalankan
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+| Layer | Teknologi |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| AI | Google Gemini API (`gemini-2.0-flash`) |
+| Styling | Tailwind CSS v4 |
+| Language | TypeScript |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Struktur Project
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── page.tsx              # Landing page
+│   ├── chat/page.tsx         # Chat interface
+│   ├── results/page.tsx      # Hasil rekomendasi
+│   ├── summary/page.tsx      # Ringkasan yang bisa disimpan
+│   └── api/chat/route.ts     # API route → Gemini
+├── components/
+│   ├── ChatBubble.tsx
+│   ├── ChipOptions.tsx
+│   ├── ProgramCard.tsx
+│   ├── VerdictBadge.tsx
+│   └── LoadingScreen.tsx
+└── lib/
+    ├── gemini.ts             # Gemini client + system prompt
+    └── types.ts              # TypeScript interfaces
+```
 
-## Deploy on Vercel
+## Catatan
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Data percakapan tidak disimpan di server — semua di browser session
+- Rekomendasi bersifat informatif, bukan keputusan resmi
+- Eligibility final ditentukan oleh petugas yang berwenang (Dinas Sosial, BPJS, dll.)
