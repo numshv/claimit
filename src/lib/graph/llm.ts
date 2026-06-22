@@ -209,13 +209,13 @@ async function waterfallInvoke(messages: BaseMessage[]): Promise<AIMessage> {
   }
 
   // ── Tier 2: Google AI Studio ─────────────────────────────────────────────
-  try {
-    return await tryTier2(messages);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    errors.push(`Tier 2 (Google AI Studio): ${msg}`);
-    console.warn("[llm] Tier 2 failed. Escalating to Tier 3 (Groq)...");
-  }
+  // try {
+  //   return await tryTier2(messages);
+  // } catch (err) {
+  //   const msg = err instanceof Error ? err.message : String(err);
+  //   errors.push(`Tier 2 (Google AI Studio): ${msg}`);
+  //   console.warn("[llm] Tier 2 failed. Escalating to Tier 3 (Groq)...");
+  // }
 
   // ── Tier 3: Groq ─────────────────────────────────────────────────────────
   try {
